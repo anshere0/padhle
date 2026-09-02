@@ -2,8 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import { usePersistedState } from '../hooks/usePersistedState';
 import { defaultSubjects } from '../data/subjects';
 import type { Subject, TopicStatus } from '../types';
-import { ArrowLeft, BookOpen, Save } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, BookOpen, Save, Loader2, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useGamification } from '../hooks/useGamification';
 
 function StarRating({ value, max = 5, onChange }: { value: number; max?: number; onChange?: (v: number) => void }) {
@@ -38,8 +38,28 @@ export default function SubjectDetail() {
   const [subjects, setSubjects] = usePersistedState<Subject[]>('subjects', defaultSubjects);
   const [notesOpen, setNotesOpen] = useState<string | null>(null);
   const { addXP } = useGamification();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Fake loading timer to make it feel like a heavy page loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const subject = subjects.find(s => s.id === id);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] animate-in fade-in duration-500">
+        <Loader2 size={40} className="text-primary-500 animate-spin mb-4" />
+        <p className="text-[var(--color-text-secondary)] font-medium text-sm flex items-center gap-2">
+          <Sparkles size={16} className="text-pink-400" /> Preparing your study environment...
+        </p>
+      </div>
+    );
+  }
 
   if (!subject) {
     return (
@@ -56,8 +76,8 @@ export default function SubjectDetail() {
   const progressScore = completedFull + (completedHalf * 0.5);
   const percent = total > 0 ? Math.round((progressScore / total) * 100) : 0;
   
-  // For the UI text display we can still show full completed count, or just use the progress score
-  const displayCompleted = completedFull;
+  // For the UI text display, show number of covered topics to avoid decimals
+  const displayCovered = completedFull + completedHalf;
 
   const updateTopic = (topicId: string, updates: Record<string, unknown>) => {
     setSubjects(prev => prev.map(s => {
@@ -73,9 +93,17 @@ export default function SubjectDetail() {
     const next: TopicStatus = current === 'NOT_STARTED' ? 'IN_PROGRESS' : current === 'IN_PROGRESS' ? 'COMPLETED' : 'NOT_STARTED';
     updateTopic(topicId, { status: next });
     
-    // Gamification XP
-    if (next === 'COMPLETED') {
-      addXP(10);
+    // Gamification XP: +5 for starting, +5 for finishing, -10 for resetting
+    if (next === 'IN_PROGRESS' && current === 'NOT_STARTED') {
+      addXP(5);
+    } else if (next === 'COMPLETED' && current === 'IN_PROGRESS') {
+      addXP(5);
+    } else if (next === 'COMPLETED' && current === 'NOT_STARTED') {
+      addXP(10); // Edge case if skipping directly
+    } else if (next === 'NOT_STARTED' && current === 'COMPLETED') {
+      addXP(-10); // Punish/reset XP for unchecking
+    } else if (next === 'NOT_STARTED' && current === 'IN_PROGRESS') {
+      addXP(-5);
     }
   };
 
@@ -104,8 +132,8 @@ export default function SubjectDetail() {
       {/* Progress */}
       <div className="card p-4">
         <div className="flex justify-between text-xs text-[var(--color-text-secondary)] mb-1 font-medium">
-          <span>Overall Progress</span>
-          <span>{displayCompleted}/{total} · {percent}%</span>
+          <span>Overall Progress ({displayCovered}/{total} covered)</span>
+          <span>{percent}%</span>
         </div>
         <div className="progress-bar">
           <div className="progress-bar-fill bg-gradient-to-r from-primary-400 to-pink-400" style={{ width: `${percent}%` }} />

@@ -34,7 +34,7 @@ export default function Subjects() {
           const progressScore = completedFull + (completedHalf * 0.5);
           const percent = total > 0 ? Math.round((progressScore / total) * 100) : 0;
           
-          const completed = completedFull; // For UI text if we show it
+          const displayCovered = completedFull + completedHalf;
           const avgConfidence = subject.topics.length > 0
             ? (subject.topics.reduce((s, t) => s + t.confidence, 0) / total).toFixed(1)
             : '0';
@@ -70,7 +70,7 @@ export default function Subjects() {
               {/* Progress bar */}
               <div className="mb-3">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[var(--color-text-muted)]">{completed}/{total} topics</span>
+                  <span className="text-[var(--color-text-muted)]">{displayCovered}/{total} covered</span>
                   <span className="font-semibold text-[var(--color-text-primary)]">{percent}%</span>
                 </div>
                 <div className="progress-bar">
@@ -107,8 +107,8 @@ export default function Subjects() {
                 <span className="text-[var(--color-text-muted)]">GAT-B <StarRating value={subject.examRelevance.gatb} /></span>
               </div>
 
-              {inProgress > 0 && (
-                <p className="text-[0.65rem] text-[var(--color-info)] mt-2">{inProgress} topic{inProgress > 1 ? 's' : ''} in progress</p>
+              {completedHalf > 0 && (
+                <p className="text-[0.65rem] text-[var(--color-info)] mt-2">{completedHalf} topic{completedHalf > 1 ? 's' : ''} in progress</p>
               )}
             </Link>
           );

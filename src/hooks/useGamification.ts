@@ -25,31 +25,45 @@ export function useGamification() {
   
   const addXP = (amount: number) => {
     setSettings((prev) => {
-      if (!prev) return prev;
-      const currentXp = prev.xp || 0;
-      const currentLevel = prev.level || 1;
+      // If settings don't exist yet, initialize a basic object with gamification defaults
+      const currentState = prev || { 
+        name: '', goal: 'M.Sc. Biotechnology 2027', targetDegree: 'M.Sc. Biotechnology',
+        dailyStudyHoursTarget: 5, theme: 'system', startDate: new Date().toISOString().split('T')[0],
+        targetGraduationYear: 2027, onboardingComplete: false,
+        gateTarget: 70, cuetTarget: 250, gatbTarget: 210,
+        weakSubjectIds: [],
+        xp: 0, level: 1, unlockedRewards: []
+      };
+
+      const currentXp = currentState.xp || 0;
+      const currentLevel = currentState.level || 1;
       
-      const newXp = currentXp + amount;
+      const newXp = Math.max(0, currentXp + amount);
       const newLevel = Math.floor(newXp / XP_PER_LEVEL) + 1;
       
-      // We flag that a level up happened by saving it to local storage. 
-      // The RewardModal component will listen to this.
       if (newLevel > currentLevel) {
         localStorage.setItem('pendingLevelUp', 'true');
         window.dispatchEvent(new Event('gamification_update'));
       }
       
-      return { ...prev, xp: newXp, level: newLevel };
+      return { ...currentState, xp: newXp, level: newLevel };
     });
   };
 
   const unlockReward = (rewardText: string) => {
     setSettings(prev => {
-      if (!prev) return prev;
+      const currentState = prev || { 
+        name: '', goal: 'M.Sc. Biotechnology 2027', targetDegree: 'M.Sc. Biotechnology',
+        dailyStudyHoursTarget: 5, theme: 'system', startDate: new Date().toISOString().split('T')[0],
+        targetGraduationYear: 2027, onboardingComplete: false,
+        gateTarget: 70, cuetTarget: 250, gatbTarget: 210,
+        weakSubjectIds: [],
+        xp: 0, level: 1, unlockedRewards: []
+      };
       return {
-        ...prev,
+        ...currentState,
         unlockedRewards: [
-          ...(prev.unlockedRewards || []),
+          ...(currentState.unlockedRewards || []),
           { id: Date.now().toString(), reward: rewardText, date: new Date().toISOString() }
         ]
       };
