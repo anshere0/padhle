@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
 import { defaultColleges } from '../data/colleges';
 import type { College, CollegePreference, CollegePriority } from '../types';
-import { Building2, Heart, ExternalLink, Search, Filter, MapPin } from 'lucide-react';
+import { Building2, Heart, ExternalLink, Search, MapPin } from 'lucide-react';
 
 export default function Colleges() {
   const [prefs, setPrefs] = usePersistedState<Record<string, CollegePreference>>('collegePref', {});
@@ -28,7 +28,7 @@ export default function Colleges() {
   };
 
   // Filter
-  let filtered = defaultColleges.filter(c => {
+  let filtered = defaultColleges.filter((c: College) => {
     if (search && !`${c.institution} ${c.programme} ${c.city} ${c.state} ${c.specialization}`.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterExam && !c.examRoute.includes(filterExam)) return false;
     if (filterType && c.institutionType !== filterType) return false;
@@ -37,7 +37,7 @@ export default function Colleges() {
     return true;
   });
 
-  const institutionTypes = [...new Set(defaultColleges.map(c => c.institutionType))].sort();
+  const institutionTypes = [...new Set(defaultColleges.map((c: College) => c.institutionType))].sort();
   const priorityColors: Record<string, string> = { DREAM: '#ec4899', TARGET: '#6366f1', BACKUP: '#f59e0b', NONE: 'var(--color-text-muted)' };
 
   return (
@@ -64,7 +64,7 @@ export default function Colleges() {
           </select>
           <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-auto">
             <option value="">All Types</option>
-            {institutionTypes.map(t => <option key={t} value={t}>{t}</option>)}
+            {institutionTypes.map(t => <option key={t as string} value={t as string}>{t as string}</option>)}
           </select>
           <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="w-auto">
             <option value="">All Priorities</option>
@@ -80,7 +80,7 @@ export default function Colleges() {
 
       {/* College cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map(college => {
+        {filtered.map((college: College) => {
           const pref = getPref(college.id);
           return (
             <div key={college.id} className="card p-5 group">

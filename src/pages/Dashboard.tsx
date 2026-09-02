@@ -6,7 +6,7 @@ import { roadmapPhases, getCurrentPhase } from '../data/roadmap';
 import type { Subject, DailyTask, StudySession, MockTest, StreakData, UserSettings } from '../types';
 import {
   Timer, Plus, TrendingUp, BookOpen, Target, Calendar, CalendarCheck, Map,
-  Heart, Flame, ChevronRight, Play, ClipboardList, AlertTriangle, Sparkles, CheckCircle, Clock, Crosshair, Star
+  Heart, Flame, ChevronRight, Play, ClipboardList, AlertTriangle, Star
 } from 'lucide-react';
 import { useState } from 'react';
 import { useGamification, XP_PER_LEVEL } from '../hooks/useGamification';
@@ -38,11 +38,6 @@ export default function Dashboard() {
   const todayStr = now.toISOString().split('T')[0];
   const todayTasks = tasks.filter(t => t.date === todayStr);
   const todayCompleted = todayTasks.filter(t => t.completed).length;
-
-  // Study hours today
-  const todaySessions = sessions.filter(s => s.startTime.startsWith(todayStr));
-  const todayMinutes = todaySessions.reduce((sum, s) => sum + s.durationMinutes, 0);
-  const todayHours = (todayMinutes / 60).toFixed(1);
 
   // Total study hours
   const totalMinutes = sessions.reduce((sum, s) => sum + s.durationMinutes, 0);

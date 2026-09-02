@@ -4,7 +4,7 @@ import { useTheme } from './hooks/usePersistedState';
 import {
   LayoutDashboard, CalendarCheck, Map, BookOpen, FileQuestion,
   ClipboardList, AlertTriangle, RotateCcw, GraduationCap,
-  Building2, Calendar, FileCheck, Settings, Menu, X,
+  Building2, Calendar, Settings, Menu, X,
   ChevronRight, Sun, Moon, Monitor
 } from 'lucide-react';
 

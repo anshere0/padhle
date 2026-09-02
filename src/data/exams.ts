@@ -1,4 +1,4 @@
-import type { Exam } from '../types';
+import type { Exam, ExamStatus } from '../types';
 
 // ===== EXAM DATABASE =====
 // Sources: REFERENCE_DATA.md, official GATE/CUET/GAT-B portals

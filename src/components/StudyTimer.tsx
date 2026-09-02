@@ -17,10 +17,10 @@ interface Props {
   initialSubject?: string;
 }
 
-export default function StudyTimer({ onClose, initialSubject = '' }: Props) {
+export default function StudyTimer({ onClose }: Props) {
   const [sessions, setSessions] = usePersistedState<StudySession[]>('sessions', []);
   const [subjects] = usePersistedState<Subject[]>('subjects', defaultSubjects);
-  const [streak, setStreak] = usePersistedState<StreakData>('streak', { currentStreak: 0, bestStreak: 0, lastStudyDate: null, studyDays: [] });
+  const [, setStreak] = usePersistedState<StreakData>('streak', { currentStreak: 0, bestStreak: 0, lastStudyDate: null, studyDays: [] });
   const { addXP } = useGamification();
 
   const [totalSeconds, setTotalSeconds] = useState(25 * 60);
@@ -116,8 +116,8 @@ export default function StudyTimer({ onClose, initialSubject = '' }: Props) {
       addXP(Math.max(5, Math.round(duration * 0.5)));
     }
 
-    setStreak(prev => {
-      const days = new Set(prev.studyDays);
+    setStreak((prev: StreakData) => {
+      const days = new Set<string>(prev.studyDays);
       days.add(today);
       const sortedDays = Array.from(days).sort();
 

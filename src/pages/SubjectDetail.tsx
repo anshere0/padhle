@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { usePersistedState } from '../hooks/usePersistedState';
 import { defaultSubjects } from '../data/subjects';
 import type { Subject, TopicStatus } from '../types';
-import { ArrowLeft, BookOpen, Save, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useGamification } from '../hooks/useGamification';
 

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { usePersistedState } from './usePersistedState';
 import type { UserSettings } from '../types';
 
