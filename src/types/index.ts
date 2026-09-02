@@ -214,6 +214,10 @@ export interface UserSettings {
   gatbTarget: number;
   // Weak subjects to show on dashboard (empty = auto-detect)
   weakSubjectIds: string[];
+  // Gamification
+  xp: number;
+  level: number;
+  unlockedRewards: { id: string; reward: string; date: string }[];
 }
 
 // ----- Streaks -----

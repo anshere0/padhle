@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
 import { defaultSubjects } from '../data/subjects';
+import { useGamification } from '../hooks/useGamification';
 import type { StudySession, Subject, StreakData } from '../types';
 import { X, Play, Pause, RotateCcw, Check } from 'lucide-react';
 
@@ -13,12 +14,14 @@ const presets = [
 
 interface Props {
   onClose: () => void;
+  initialSubject?: string;
 }
 
-export default function StudyTimer({ onClose }: Props) {
+export default function StudyTimer({ onClose, initialSubject = '' }: Props) {
   const [sessions, setSessions] = usePersistedState<StudySession[]>('sessions', []);
   const [subjects] = usePersistedState<Subject[]>('subjects', defaultSubjects);
   const [streak, setStreak] = usePersistedState<StreakData>('streak', { currentStreak: 0, bestStreak: 0, lastStudyDate: null, studyDays: [] });
+  const { addXP } = useGamification();
 
   const [totalSeconds, setTotalSeconds] = useState(25 * 60);
   const [remaining, setRemaining] = useState(25 * 60);
@@ -107,6 +110,12 @@ export default function StudyTimer({ onClose }: Props) {
 
     // Update streak
     const today = new Date().toISOString().split('T')[0];
+    
+    // Add XP based on duration (approx 5 XP per 10 minutes = 0.5 * min)
+    if (duration >= 5) {
+      addXP(Math.max(5, Math.round(duration * 0.5)));
+    }
+
     setStreak(prev => {
       const days = new Set(prev.studyDays);
       days.add(today);

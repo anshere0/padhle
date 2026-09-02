@@ -12,6 +12,7 @@ const defaultSettings: UserSettings = {
   targetGraduationYear: 2027, onboardingComplete: false,
   gateTarget: 70, cuetTarget: 250, gatbTarget: 210,
   weakSubjectIds: [],
+  xp: 0, level: 1, unlockedRewards: [],
 };
 
 export default function SettingsPage() {
@@ -88,10 +89,10 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Target Scores */}
+      {/* Gentle Goals */}
       <div className="card p-5">
-        <h2 className="text-sm font-bold text-[var(--color-text-primary)] mb-1">Preparation Targets</h2>
-        <p className="text-[0.65rem] text-[var(--color-text-muted)] mb-4">Personal preparation goals — NOT official cutoffs</p>
+        <h2 className="text-sm font-bold text-[var(--color-text-primary)] mb-1">Gentle Goals</h2>
+        <p className="text-[0.65rem] text-[var(--color-text-muted)] mb-4">Personal preparation targets — no pressure, just for direction 🌸</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="text-xs font-medium text-[var(--color-text-muted)] block mb-1">GATE Target (/ 100)</label>

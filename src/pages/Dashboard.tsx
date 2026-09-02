@@ -6,9 +6,10 @@ import { roadmapPhases, getCurrentPhase } from '../data/roadmap';
 import type { Subject, DailyTask, StudySession, MockTest, StreakData, UserSettings } from '../types';
 import {
   Timer, Plus, TrendingUp, BookOpen, Target, Calendar, CalendarCheck, Map,
-  Heart, Flame, ChevronRight, Play, ClipboardList, AlertTriangle, Sparkles
+  Heart, Flame, ChevronRight, Play, ClipboardList, AlertTriangle, Sparkles, CheckCircle, Clock, Crosshair, Star
 } from 'lucide-react';
 import { useState } from 'react';
+import { useGamification, XP_PER_LEVEL } from '../hooks/useGamification';
 import StudyTimer from '../components/StudyTimer';
 
 const defaultSettings: UserSettings = {
@@ -17,12 +18,14 @@ const defaultSettings: UserSettings = {
   targetGraduationYear: 2027, onboardingComplete: false,
   gateTarget: 70, cuetTarget: 250, gatbTarget: 210,
   weakSubjectIds: [],
+  xp: 0, level: 1, unlockedRewards: [],
 };
 
 export default function Dashboard() {
   const greeting = useGreeting();
   const now = useLiveDate();
   const [settings] = usePersistedState<UserSettings>('settings', defaultSettings);
+  const { xp, level } = useGamification();
   const [subjects] = usePersistedState<Subject[]>('subjects', defaultSubjects);
   const [sessions] = usePersistedState<StudySession[]>('sessions', []);
   const [mocks] = usePersistedState<MockTest[]>('mocks', []);
@@ -47,8 +50,10 @@ export default function Dashboard() {
 
   // Syllabus progress
   const totalTopics = subjects.reduce((sum, s) => sum + s.topics.length, 0);
-  const completedTopics = subjects.reduce((sum, s) => sum + s.topics.filter(t => t.status === 'COMPLETED').length, 0);
-  const syllabusPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+  const completedFullTopics = subjects.reduce((sum, s) => sum + s.topics.filter(t => t.status === 'COMPLETED').length, 0);
+  const completedHalfTopics = subjects.reduce((sum, s) => sum + s.topics.filter(t => t.status === 'IN_PROGRESS').length, 0);
+  const progressScore = completedFullTopics + (completedHalfTopics * 0.5);
+  const syllabusPercent = totalTopics > 0 ? Math.round((progressScore / totalTopics) * 100) : 0;
 
   // Total questions
   const totalQuestions = subjects.reduce((sum, s) => sum + s.topics.reduce((ts, t) => ts + t.questionsAttempted, 0), 0);
@@ -58,8 +63,10 @@ export default function Dashboard() {
   // Weakest subjects (lowest completion or user selected)
   const subjectProgress = subjects.map(s => {
     const total = s.topics.length;
-    const done = s.topics.filter(t => t.status === 'COMPLETED').length;
-    return { id: s.id, name: s.name, icon: s.icon, percent: total > 0 ? Math.round((done / total) * 100) : 0, total, done };
+    const doneFull = s.topics.filter(t => t.status === 'COMPLETED').length;
+    const doneHalf = s.topics.filter(t => t.status === 'IN_PROGRESS').length;
+    const sScore = doneFull + (doneHalf * 0.5);
+    return { id: s.id, name: s.name, icon: s.icon, percent: total > 0 ? Math.round((sScore / total) * 100) : 0, total, done: doneFull };
   });
 
   const weakest = settings.weakSubjectIds && settings.weakSubjectIds.length > 0
@@ -74,14 +81,13 @@ export default function Dashboard() {
 
   // Motivation messages
   const motivationMessages = [
-    "krloo konuu 💪",
-    "ho jayegaaa babyy 🌟",
-    "you are doing good ❤️",
-    "one topic at a time, you've got this 🧬",
-    "future M.Sc. student right here ✨",
-    "take a break if you need, then come back stronger 💜",
-    "every hour you study counts 📚",
-    "proud of you for showing up today 🌸",
+    "okay take a 5 minutes break ❤️",
+    "i lovee you baby, keep going ✨",
+    "krle oyee 💕",
+    "kya re shani, padh chup chapp 😤",
+    "imagine if i was with you----ye sb badme abhi padhai 🫣",
+    "raipur se jana hai na baby krlo ✈️",
+    "you are doing great 🌸"
   ];
   const randomMotivation = motivationMessages[Math.floor(Math.random() * motivationMessages.length)];
 
@@ -107,6 +113,27 @@ export default function Dashboard() {
           <Link to="/mistakes" className="btn btn-secondary btn-sm hidden sm:inline-flex">
             <AlertTriangle size={14} /> Log Mistake
           </Link>
+        </div>
+      </div>
+
+      {/* Gamification Level Banner */}
+      <div className="card-flat p-4 bg-gradient-to-r from-primary-50 to-pink-50 dark:from-primary-950/40 dark:to-pink-950/40 border-primary-100 dark:border-primary-900/50">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 p-1.5 rounded-full">
+              <Star size={16} fill="currentColor" />
+            </div>
+            <span className="font-bold text-sm text-[var(--color-text-primary)]">Level {level}</span>
+          </div>
+          <span className="text-xs text-[var(--color-text-muted)] font-medium">
+            {xp % XP_PER_LEVEL} / {XP_PER_LEVEL} XP to next level
+          </span>
+        </div>
+        <div className="progress-bar h-2 bg-white/50 dark:bg-black/20">
+          <div 
+            className="progress-bar-fill bg-gradient-to-r from-primary-400 to-pink-400" 
+            style={{ width: `${((xp % XP_PER_LEVEL) / XP_PER_LEVEL) * 100}%` }} 
+          />
         </div>
       </div>
 
@@ -245,13 +272,13 @@ export default function Dashboard() {
 
       {/* Weak Subjects + Deadlines + Mock */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Weakest subjects */}
+        {/* Areas to Nurture */}
         <div className="card p-5">
           <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3 flex items-center gap-2">
-            <AlertTriangle size={16} className="text-[var(--color-warning)]" /> Weakest Areas
+            <Heart size={16} className="text-[var(--color-danger)]" /> Areas to Nurture
           </h3>
           {weakest.length === 0 ? (
-            <p className="text-sm text-[var(--color-text-muted)]">All subjects on track! 🎉</p>
+            <p className="text-sm text-[var(--color-text-muted)]">All subjects are thriving! 🌸</p>
           ) : (
             <div className="space-y-3">
               {weakest.map((s, i) => (
@@ -349,15 +376,15 @@ export default function Dashboard() {
         onClick={() => setShowMotivation(!showMotivation)}
       >
         <div className="flex items-center justify-center gap-2 text-sm text-[var(--color-text-secondary)]">
-          <Heart size={16} className="text-pink-400" />
-          <span>Feeling tired or demotivated? Click here 💕</span>
+          <Heart size={16} className="text-pink-400 animate-pulse-subtle" />
+          <span>Message from Anshu 💕</span>
         </div>
         {showMotivation && (
           <div className="mt-4 animate-in">
-            <p className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+            <p className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
               {randomMotivation}
             </p>
-            <p className="text-xs text-[var(--color-text-muted)] mt-2">— from someone who believes in you</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">— Anshu</p>
           </div>
         )}
       </div>

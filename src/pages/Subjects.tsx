@@ -29,9 +29,12 @@ export default function Subjects() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {subjects.map(subject => {
           const total = subject.topics.length;
-          const completed = subject.topics.filter(t => t.status === 'COMPLETED').length;
-          const inProgress = subject.topics.filter(t => t.status === 'IN_PROGRESS').length;
-          const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+          const completedFull = subject.topics.filter(t => t.status === 'COMPLETED').length;
+          const completedHalf = subject.topics.filter(t => t.status === 'IN_PROGRESS').length;
+          const progressScore = completedFull + (completedHalf * 0.5);
+          const percent = total > 0 ? Math.round((progressScore / total) * 100) : 0;
+          
+          const completed = completedFull; // For UI text if we show it
           const avgConfidence = subject.topics.length > 0
             ? (subject.topics.reduce((s, t) => s + t.confidence, 0) / total).toFixed(1)
             : '0';

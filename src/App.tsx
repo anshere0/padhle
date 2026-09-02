@@ -11,6 +11,7 @@ import {
 // Lazy page imports will be replaced with real pages
 import Dashboard from './pages/Dashboard';
 import Today from './pages/Today';
+import CalendarPage from './pages/Calendar';
 import Roadmap from './pages/Roadmap';
 import Subjects from './pages/Subjects';
 import SubjectDetail from './pages/SubjectDetail';
@@ -22,10 +23,12 @@ import Exams from './pages/Exams';
 import Colleges from './pages/Colleges';
 import Deadlines from './pages/Deadlines';
 import SettingsPage from './pages/Settings';
+import RewardModal from './components/RewardModal';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/today', label: 'Today', icon: CalendarCheck },
+  { path: '/calendar', label: 'Calendar', icon: Calendar },
   { path: '/roadmap', label: 'Roadmap', icon: Map },
   { path: '/subjects', label: 'Subjects', icon: BookOpen },
   { path: '/pyqs', label: 'PYQs', icon: FileQuestion },
@@ -35,7 +38,6 @@ const navItems = [
   { path: '/exams', label: 'Exams', icon: GraduationCap },
   { path: '/colleges', label: 'Colleges', icon: Building2 },
   { path: '/deadlines', label: 'Deadlines', icon: Calendar },
-  { path: '/documents', label: 'Documents', icon: FileCheck },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -188,6 +190,7 @@ function AppLayout() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/today" element={<Today />} />
+            <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/roadmap" element={<Roadmap />} />
             <Route path="/subjects" element={<Subjects />} />
             <Route path="/subjects/:id" element={<SubjectDetail />} />
@@ -198,13 +201,13 @@ function AppLayout() {
             <Route path="/exams" element={<Exams />} />
             <Route path="/colleges" element={<Colleges />} />
             <Route path="/deadlines" element={<Deadlines />} />
-            <Route path="/documents" element={<Deadlines />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </div>
       </main>
 
       <MobileBottomNav />
+      <RewardModal />
     </div>
   );
 }

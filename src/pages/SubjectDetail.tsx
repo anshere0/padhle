@@ -4,6 +4,7 @@ import { defaultSubjects } from '../data/subjects';
 import type { Subject, TopicStatus } from '../types';
 import { ArrowLeft, BookOpen, Save } from 'lucide-react';
 import { useState } from 'react';
+import { useGamification } from '../hooks/useGamification';
 
 function StarRating({ value, max = 5, onChange }: { value: number; max?: number; onChange?: (v: number) => void }) {
   return (
@@ -36,6 +37,7 @@ export default function SubjectDetail() {
   const { id } = useParams<{ id: string }>();
   const [subjects, setSubjects] = usePersistedState<Subject[]>('subjects', defaultSubjects);
   const [notesOpen, setNotesOpen] = useState<string | null>(null);
+  const { addXP } = useGamification();
 
   const subject = subjects.find(s => s.id === id);
 
@@ -49,8 +51,13 @@ export default function SubjectDetail() {
   }
 
   const total = subject.topics.length;
-  const completed = subject.topics.filter(t => t.status === 'COMPLETED').length;
-  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const completedFull = subject.topics.filter(t => t.status === 'COMPLETED').length;
+  const completedHalf = subject.topics.filter(t => t.status === 'IN_PROGRESS').length;
+  const progressScore = completedFull + (completedHalf * 0.5);
+  const percent = total > 0 ? Math.round((progressScore / total) * 100) : 0;
+  
+  // For the UI text display we can still show full completed count, or just use the progress score
+  const displayCompleted = completedFull;
 
   const updateTopic = (topicId: string, updates: Record<string, unknown>) => {
     setSubjects(prev => prev.map(s => {
@@ -65,6 +72,11 @@ export default function SubjectDetail() {
   const cycleStatus = (topicId: string, current: TopicStatus) => {
     const next: TopicStatus = current === 'NOT_STARTED' ? 'IN_PROGRESS' : current === 'IN_PROGRESS' ? 'COMPLETED' : 'NOT_STARTED';
     updateTopic(topicId, { status: next });
+    
+    // Gamification XP
+    if (next === 'COMPLETED') {
+      addXP(10);
+    }
   };
 
   return (
@@ -91,12 +103,12 @@ export default function SubjectDetail() {
 
       {/* Progress */}
       <div className="card p-4">
-        <div className="flex justify-between text-sm mb-2">
-          <span className="text-[var(--color-text-secondary)]">Overall Progress</span>
-          <span className="font-bold text-[var(--color-text-primary)]">{completed}/{total} · {percent}%</span>
+        <div className="flex justify-between text-xs text-[var(--color-text-secondary)] mb-1 font-medium">
+          <span>Overall Progress</span>
+          <span>{displayCompleted}/{total} · {percent}%</span>
         </div>
-        <div className="progress-bar h-2">
-          <div className="progress-bar-fill bg-primary-500" style={{ width: `${percent}%` }} />
+        <div className="progress-bar">
+          <div className="progress-bar-fill bg-gradient-to-r from-primary-400 to-pink-400" style={{ width: `${percent}%` }} />
         </div>
         <div className="flex gap-6 mt-3 text-xs text-[var(--color-text-muted)]">
           <span>GATE <ExamStars value={subject.examRelevance.gate} /></span>

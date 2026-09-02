@@ -1,32 +1,13 @@
 import { usePersistedState } from '../hooks/usePersistedState';
 import { exams, daysRemaining } from '../data/exams';
-import type { DocumentItem, Deadline } from '../types';
-import { Calendar, FileCheck, Plus, X } from 'lucide-react';
+import type { Deadline } from '../types';
+import { Calendar, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
-const defaultDocuments: DocumentItem[] = [
-  { id: 'd1', label: 'Photograph (passport size)', checked: false },
-  { id: 'd2', label: 'Signature scan', checked: false },
-  { id: 'd3', label: 'Government ID proof', checked: false },
-  { id: 'd4', label: '10th Marksheet', checked: false },
-  { id: 'd5', label: '12th Marksheet', checked: false },
-  { id: 'd6', label: 'Semester Marksheets (all)', checked: false },
-  { id: 'd7', label: 'Degree / Provisional Certificate', checked: false },
-  { id: 'd8', label: 'Category Certificate (if applicable)', checked: false },
-  { id: 'd9', label: 'Application Fee receipts', checked: false },
-  { id: 'd10', label: 'Admit Card(s)', checked: false },
-  { id: 'd11', label: 'Scorecard(s)', checked: false },
-];
-
 export default function Deadlines() {
-  const [documents, setDocuments] = usePersistedState<DocumentItem[]>('documents', defaultDocuments);
   const [customDeadlines, setCustomDeadlines] = usePersistedState<Deadline[]>('customDeadlines', []);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', exam: '', date: '', type: '', notes: '' });
-
-  const toggleDoc = (id: string) => {
-    setDocuments(prev => prev.map(d => d.id === id ? { ...d, checked: !d.checked } : d));
-  };
 
   const addDeadline = () => {
     if (!form.title) return;
@@ -76,8 +57,6 @@ export default function Deadlines() {
     if (!b.date) return -1;
     return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
-
-  const docsReady = documents.filter(d => d.checked).length;
 
   const examColors: Record<string, string> = { 'GATE': '#6366f1', 'CUET-PG': '#10b981', 'GAT-B': '#f59e0b' };
 
@@ -155,35 +134,6 @@ export default function Deadlines() {
             </div>
           );
         })}
-      </div>
-
-      {/* Document checklist */}
-      <div>
-        <h2 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2 mb-1">
-          <FileCheck size={20} /> Document Checklist
-        </h2>
-        <p className="text-sm text-[var(--color-text-secondary)] mb-4">{docsReady}/{documents.length} ready</p>
-
-        <div className="progress-bar h-2 mb-4">
-          <div className="progress-bar-fill bg-[var(--color-success)]" style={{ width: `${(docsReady / documents.length) * 100}%` }} />
-        </div>
-
-        <div className="space-y-2">
-          {documents.map(doc => (
-            <div key={doc.id} className="card p-3 flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="custom-checkbox"
-                checked={doc.checked}
-                onChange={() => toggleDoc(doc.id)}
-                aria-label={doc.label}
-              />
-              <span className={`text-sm ${doc.checked ? 'line-through text-[var(--color-text-muted)]' : 'text-[var(--color-text-primary)]'}`}>
-                {doc.label}
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
